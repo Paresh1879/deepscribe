@@ -1,0 +1,5 @@
+Name: John Davis
+Age: 47
+Occupation: Unknown
+Visit Date: October 15, 2025
+Chief Complaint: Persistent cough for about three weeks

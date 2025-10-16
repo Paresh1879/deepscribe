@@ -1,0 +1,37 @@
+{
+  "name": "deepscribe-api",
+  "version": "2.1.0",
+  "description": "Backend API for DeepScribe Chat Interface with LangChain + RAG + HyDE",
+  "type": "module",
+  "main": "src/server-langchain.js",
+  "scripts": {
+    "start": "node src/server-langchain.js",
+    "dev": "nodemon src/server-langchain.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "medical",
+    "chat",
+    "transcript",
+    "soap-notes",
+    "clinical"
+  ],
+  "author": "DeepScribe Challenge",
+  "license": "MIT",
+  "dependencies": {
+    "@langchain/community": "^0.3.57",
+    "@langchain/core": "^0.3.78",
+    "@langchain/google-genai": "^0.2.18",
+    "@supabase/supabase-js": "^2.39.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "langchain": "^0.3.36",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

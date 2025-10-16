@@ -1,0 +1,29 @@
+{
+  "name": "deepscribe-coding-challenge",
+  "version": "1.0.0",
+  "description": "Interactive chat interface for clinical documentation analysis",
+  "scripts": {
+    "install:all": "npm install && cd api && npm install && cd ../app && npm install",
+    "start": "npm run dev:full",
+    "start:api": "cd api && npm start",
+    "start:app": "cd app && npm start",
+    "dev": "npm run dev:full",
+    "dev:api": "cd api && npm run dev",
+    "dev:app": "cd app && npm start",
+    "dev:full": "concurrently \"npm run dev:api\" \"npm run dev:app\"",
+    "build": "cd app && npm run build",
+    "test": "cd api && npm test"
+  },
+  "keywords": [
+    "medical",
+    "chat",
+    "transcript",
+    "soap-notes",
+    "clinical"
+  ],
+  "author": "DeepScribe Challenge",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
