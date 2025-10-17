@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS conversation_messages (
   session_id UUID NOT NULL REFERENCES conversation_sessions(session_id) ON DELETE CASCADE,
   role VARCHAR(20) NOT NULL CHECK (role IN ('user', 'assistant')),
   content TEXT NOT NULL,
+  highlighting_data JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

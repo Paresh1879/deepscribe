@@ -22,10 +22,14 @@ export async function handleRAGQuery(sessionId, question, model, ragService, con
     // Use HyDE-enhanced search
     const relevantChunks = await ragService.searchRelevantChunks(sessionId, question, 4, contextForHyDE);
     if (relevantChunks.length === 0) {
-      return "I couldn't find relevant information in the transcript to answer your question. Please clarify or ask about a different aspect of the patient's case.";
+      return {
+        answer: "I couldn't find relevant information in the transcript to answer your question. Please clarify or ask about a different aspect of the patient's case.",
+        highlightingData: []
+      };
     }
 
-    // Ambiguity detection handled by RAG + HyDE system
+    // Get highlighting data for the relevant chunks using LLM-based keyword extraction
+    const highlightingData = await ragService.getHighlightingData(sessionId, relevantChunks, question);
 
     const promptTemplate = PromptTemplate.fromTemplate(`
 SYSTEM ROLE:
@@ -66,12 +70,17 @@ Answer:`);
       new StringOutputParser(),
     ]);
 
-    return await chain.invoke({
+    const answer = await chain.invoke({
       context: relevantChunks.map((c,i)=> `[Chunk ${i+1}] ${c.text}`).join('\n\n---\n\n'),
       summary: contextSummary,
       chat_history: formatChatHistory(recentHistory),
       question
     });
+
+    return {
+      answer,
+      highlightingData
+    };
 
   } catch (error) {
     console.error('Error in RAG query:', error);
@@ -86,6 +95,9 @@ export async function handleFullTranscriptQuery(sessionId, question, model, conv
   try {
     const recentHistory = await conversationService.getRecentContext(sessionId, 5);
     const contextSummary = await getConversationSummary(sessionId, conversationService);
+
+    // For full transcript queries, we'll create highlighting data using LLM-based keyword extraction
+    const highlightingData = await createFullTranscriptHighlighting(sampleData.transcript, question);
 
     const promptTemplate = PromptTemplate.fromTemplate(`
 SYSTEM ROLE:
@@ -129,13 +141,18 @@ Answer:`);
       new StringOutputParser(),
     ]);
 
-    return await chain.invoke({
+    const answer = await chain.invoke({
       transcript: sampleData.transcript,
       soap_note: sampleData.soapNote || 'No SOAP note available',
       summary: contextSummary,
       chat_history: formatChatHistory(recentHistory),
       question
     });
+
+    return {
+      answer,
+      highlightingData
+    };
 
   } catch (error) {
     console.error('Error in full transcript query:', error);
@@ -196,6 +213,89 @@ async function getConversationSummary(sessionId, conversationService) {
   } catch (error) {
     console.error('Error creating conversation summary:', error);
     return 'Unable to summarize conversation context.';
+  }
+}
+
+/**
+ * Use LLM to find exact matching sentences for highlighting
+ */
+async function findExactMatchingSentences(question, transcript) {
+  try {
+    const { ChatGoogleGenerativeAI } = await import('@langchain/google-genai');
+    
+    const llm = new ChatGoogleGenerativeAI({
+      apiKey: process.env.GEMINI_API_KEY,
+      model: 'gemini-2.5-flash-lite',
+      temperature: 0.1
+    });
+
+    const prompt = `
+Given this medical question and transcript, find the EXACT sentences that directly answer the question.
+
+Question: "${question}"
+Transcript: "${transcript}"
+
+Find 1-2 sentences from the transcript that most directly answer this specific question. Return ONLY the exact sentence text as it appears in the transcript, one per line. Do not modify or explain:
+
+Exact sentence 1
+Exact sentence 2
+`;
+
+    const response = await llm.invoke(prompt);
+    let content = response.content;
+    
+    // Clean the response - remove any formatting
+    if (content.includes('```')) {
+      content = content.split('```')[1].split('```')[0].trim();
+    }
+    
+    const sentences = content.split('\n')
+      .map(s => s.trim())
+      .filter(s => s.length > 10 && !s.toLowerCase().includes('sentence'))
+      .slice(0, 2);
+    
+    return sentences;
+  } catch (error) {
+    console.error('Error finding exact matching sentences with LLM:', error);
+    return [];
+  }
+}
+
+/**
+ * Create highlighting data for full transcript queries using LLM
+ */
+async function createFullTranscriptHighlighting(transcript, question) {
+  if (!transcript || !question) {
+    return [];
+  }
+
+  try {
+    // Use LLM to find exact matching sentences
+    const matchingSentences = await findExactMatchingSentences(question, transcript);
+    
+    const highlightingData = [];
+    
+    for (const sentence of matchingSentences) {
+      const startIndex = transcript.indexOf(sentence);
+      if (startIndex !== -1) {
+        highlightingData.push({
+          chunkIndex: 0,
+          text: sentence,
+          startIndex: startIndex,
+          endIndex: startIndex + sentence.length,
+          similarity: 1.0,
+          type: 'transcript',
+          relevanceScore: 1.0,
+          matchedKeywords: []
+        });
+      }
+    }
+
+    return highlightingData;
+      
+  } catch (error) {
+    console.error('Error in LLM-based highlighting:', error);
+    return [];
   }
 }
 

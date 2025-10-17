@@ -179,6 +179,107 @@ class RAGService {
   }
 
   /**
+   * Use LLM to find exact matching text for highlighting
+   */
+  async findExactMatchingText(fullTranscript, question) {
+    try {
+      const { ChatGoogleGenerativeAI } = await import('@langchain/google-genai');
+      
+      const llm = new ChatGoogleGenerativeAI({
+        apiKey: process.env.GEMINI_API_KEY,
+        model: 'gemini-2.5-flash-lite',
+        temperature: 0.1
+      });
+
+      const prompt = `
+Given this medical question and transcript, find the EXACT text that directly answers the question.
+
+Question: "${question}"
+Transcript: "${fullTranscript}"
+
+Find 1-2 sentences from the transcript that most directly answer this specific question. Return ONLY the exact sentence text as it appears in the transcript, one per line. Do not modify or explain:
+
+Exact sentence 1
+Exact sentence 2
+`;
+
+      const response = await llm.invoke(prompt);
+      let content = response.content;
+      
+      // Clean the response - remove any formatting
+      if (content.includes('```')) {
+        content = content.split('```')[1].split('```')[0].trim();
+      }
+      
+      const sentences = content.split('\n')
+        .map(s => s.trim())
+        .filter(s => s.length > 10 && !s.toLowerCase().includes('sentence'))
+        .slice(0, 2);
+      
+      return sentences;
+    } catch (error) {
+      console.error('Error finding exact matching text with LLM:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get highlighting data using LLM to find exact matching text
+   */
+  async getHighlightingData(sessionId, relevantChunks, question = '') {
+    try {
+      if (!question) {
+        return [];
+      }
+
+      // Get the full transcript
+      const { data: sessionData } = await this.supabase
+        .from('rag_sessions')
+        .select('transcript')
+        .eq('session_id', sessionId)
+        .single();
+
+      if (!sessionData || !sessionData.transcript) {
+        return [];
+      }
+
+      const fullTranscript = sessionData.transcript;
+      
+      // Use LLM to find exact matching sentences
+      const matchingSentences = await this.findExactMatchingText(fullTranscript, question);
+      
+      if (matchingSentences.length === 0) {
+        return [];
+      }
+
+      const highlightingData = [];
+
+      for (const sentence of matchingSentences) {
+        const startIndex = fullTranscript.indexOf(sentence);
+        
+        if (startIndex !== -1) {
+          highlightingData.push({
+            chunkIndex: 0,
+            text: sentence,
+            startIndex: startIndex,
+            endIndex: startIndex + sentence.length,
+            similarity: 1.0,
+            type: 'transcript',
+            relevanceScore: 1.0,
+            matchedKeywords: []
+          });
+        }
+      }
+
+      return highlightingData;
+
+    } catch (error) {
+      console.error('Error getting highlighting data:', error);
+      return [];
+    }
+  }
+
+  /**
    * Determine if HyDE should be used for this query
    */
   shouldUseHyDE(query) {
@@ -333,3 +434,4 @@ class RAGService {
 }
 
 export const ragService = new RAGService();
+

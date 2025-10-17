@@ -352,6 +352,7 @@ app.post('/api/chat/message', async (req, res) => {
     // Ambiguity detection removed - handled by RAG + HyDE system
     
     let aiResponse;
+    let highlightingData = [];
     let responseMetadata = {
       useRAG: false
     };
@@ -359,25 +360,30 @@ app.post('/api/chat/message', async (req, res) => {
     // Check if session uses RAG
     const sessionInfo = await ragService.getSessionInfo(sessionId);
     const useRAG = sessionInfo && sessionInfo.useRAG;
-    
+
     if (useRAG) {
       // Use RAG for response
-      aiResponse = await handleRAGQuery(sessionId, message, model, ragService, conversationService);
+      const ragResponse = await handleRAGQuery(sessionId, message, model, ragService, conversationService);
+      aiResponse = ragResponse.answer;
+      highlightingData = ragResponse.highlightingData || [];
       responseMetadata.useRAG = true;
     } else {
       // Use full transcript for response
-      aiResponse = await handleFullTranscriptQuery(sessionId, message, model, conversationService, sampleData);
+      const fullTranscriptResponse = await handleFullTranscriptQuery(sessionId, message, model, conversationService, sampleData);
+      aiResponse = fullTranscriptResponse.answer;
+      highlightingData = fullTranscriptResponse.highlightingData || [];
     }
     
     // Save interaction to conversation memory
-    await conversationService.addInteraction(sessionId, message, aiResponse);
+    await conversationService.addInteraction(sessionId, message, aiResponse, highlightingData);
     
     res.json({
       message: {
         id: Date.now(),
         type: 'assistant',
         content: aiResponse,
-        timestamp: new Date()
+        timestamp: new Date(),
+        highlightingData: highlightingData
       },
       metadata: responseMetadata,
       sessionInfo: sessionInfo || { useRAG: false }
@@ -403,6 +409,7 @@ app.get('/api/chat/session/:sessionId/history', async (req, res) => {
       id: index,
       type: msg._getType() === 'human' ? 'user' : 'assistant',
       content: msg.content,
+      highlightingData: msg.highlightingData || null,
       timestamp: new Date() // Note: LangChain doesn't store timestamps by default
     }));
     

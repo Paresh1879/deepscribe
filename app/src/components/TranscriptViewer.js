@@ -11,7 +11,7 @@ const api = {
   }
 };
 
-const TranscriptViewer = () => {
+const TranscriptViewer = ({ highlightData }) => {
   const [sampleData, setSampleData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,9 +30,48 @@ const TranscriptViewer = () => {
     }
   };
 
+  const renderHighlightedText = (text, highlightData) => {
+    if (!highlightData || !text) {
+      return text;
+    }
+
+    const { startIndex, endIndex } = highlightData;
+    
+    if (startIndex === -1 || endIndex === -1) {
+      return text;
+    }
+
+    const beforeText = text.substring(0, startIndex);
+    const highlightedText = text.substring(startIndex, endIndex);
+    const afterText = text.substring(endIndex);
+
+    return (
+      <>
+        {beforeText}
+        <span className="transcript-highlighted">{highlightedText}</span>
+        {afterText}
+      </>
+    );
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (highlightData && sampleData) {
+      // Scroll to the highlighted section after a short delay to ensure DOM is ready
+      setTimeout(() => {
+        const highlightedElement = document.querySelector('.transcript-highlighted');
+        if (highlightedElement) {
+          highlightedElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 500);
+    }
+  }, [highlightData, sampleData]);
 
   if (isLoading) {
     return (
@@ -124,7 +163,7 @@ const TranscriptViewer = () => {
             Patient-Provider Conversation Transcript
           </h3>
           <div className="transcript-text">
-            {sampleData.transcript || 'No transcript available'}
+            {renderHighlightedText(sampleData.transcript || 'No transcript available', highlightData)}
           </div>
         </motion.div>
 

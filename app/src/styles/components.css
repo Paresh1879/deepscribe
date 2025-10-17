@@ -254,3 +254,379 @@
     border-radius: 0.4rem;
   }
 }
+
+/* Transcript Highlighter Styles */
+.transcript-highlighter {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid #3b82f6;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+  max-width: 90vw;
+  width: 600px;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+}
+
+.highlighter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 1rem 1rem 0 0;
+  color: white;
+}
+
+.highlighter-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.close-highlighter {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.close-highlighter:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.highlight-bubbles-container {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.highlight-bubble {
+  background: white;
+  border: 2px solid var(--relevance-color, #3b82f6);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.highlight-bubble:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border-color: var(--relevance-color, #3b82f6);
+}
+
+.highlight-bubble-content {
+  position: relative;
+  z-index: 2;
+}
+
+.highlight-bubble-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.highlight-relevance {
+  background: var(--relevance-color, #3b82f6);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.highlight-bubble-text {
+  color: #374151;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+.highlight-bubble-type {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.highlight-bubble-arrow {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid var(--relevance-color, #3b82f6);
+}
+
+.highlighter-footer {
+  padding: 0.75rem 1.5rem;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0 0 1rem 1rem;
+  text-align: center;
+}
+
+.highlighter-hint {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Highlighted Transcript Overlay */
+.highlighted-transcript-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.highlighted-transcript-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.highlighted-transcript-header h4 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.highlighted-transcript-content {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.transcript-section {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.transcript-before,
+.transcript-after {
+  color: #6b7280;
+}
+
+.transcript-highlighted {
+  background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%);
+  color: #92400e;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  border: 2px solid #f59e0b;
+  animation: highlightPulse 2s ease-in-out;
+}
+
+@keyframes highlightPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(245, 158, 11, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
+
+/* Inline Message Highlight Button */
+.assistant-message-wrapper {
+  position: relative;
+}
+
+.message-highlight-bubble {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  z-index: 10;
+}
+
+.highlight-arrow-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.highlight-arrow-button:hover {
+  transform: scale(1.1);
+}
+
+.highlight-arrow {
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 12px solid #fbbf24;
+  transition: all 0.2s ease;
+  filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.3));
+}
+
+.highlight-arrow-button:hover .highlight-arrow {
+  border-bottom-color: #f59e0b;
+  filter: drop-shadow(0 4px 8px rgba(245, 158, 11, 0.5));
+}
+
+/* Tooltip */
+.highlight-arrow-button::before {
+  content: "Show in Transcript";
+  position: absolute;
+  bottom: 100%;
+  right: 50%;
+  transform: translateX(50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 1000;
+  margin-bottom: 8px;
+}
+
+.highlight-arrow-button::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  right: 50%;
+  transform: translateX(50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  margin-bottom: 3px;
+}
+
+.highlight-arrow-button:hover::before,
+.highlight-arrow-button:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Responsive Design for Highlighter */
+@media (max-width: 768px) {
+  .transcript-highlighter {
+    bottom: 80px;
+    width: 95vw;
+    max-width: none;
+  }
+  
+  .highlight-bubbles-container {
+    padding: 1rem;
+  }
+  
+  .highlight-bubble {
+    padding: 0.75rem;
+  }
+  
+  .highlighted-transcript-overlay {
+    padding: 1rem;
+  }
+  
+  .highlighted-transcript-content {
+    padding: 1rem;
+    max-height: 70vh;
+  }
+  
+  .message-highlight-bubble {
+    top: -8px;
+    right: -8px;
+  }
+  
+  .highlight-arrow {
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 10px solid #fbbf24;
+  }
+}
+
+@media (max-width: 480px) {
+  .transcript-highlighter {
+    bottom: 70px;
+  }
+  
+  .highlighter-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .highlight-bubbles-container {
+    padding: 0.75rem;
+  }
+  
+  .highlight-bubble-text {
+    font-size: 0.8rem;
+  }
+  
+  .message-highlight-bubble {
+    top: -6px;
+    right: -6px;
+  }
+  
+  .highlight-arrow {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 8px solid #fbbf24;
+  }
+  
+  .highlight-arrow-button::before {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+}

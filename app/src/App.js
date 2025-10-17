@@ -11,6 +11,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('chat');
+  const [highlightData, setHighlightData] = useState(null);
 
   useEffect(() => {
     initializeSession();
@@ -37,6 +38,11 @@ function App() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleNavigateToTranscript = (highlightData) => {
+    setHighlightData(highlightData);
+    setActiveTab('transcript');
   };
 
 
@@ -81,12 +87,13 @@ function App() {
       >
         {activeTab === 'chat' && (
           <ChatInterface 
-            sessionId={sessionId} 
+            sessionId={sessionId}
+            onNavigateToTranscript={handleNavigateToTranscript}
           />
         )}
         
         {activeTab === 'transcript' && (
-          <TranscriptViewer />
+          <TranscriptViewer highlightData={highlightData} />
         )}
 
       </motion.main>

@@ -73,7 +73,7 @@ class ConversationService {
   /**
    * Add interaction to memory
    */
-  async addInteraction(sessionId, question, answer) {
+  async addInteraction(sessionId, question, answer, highlightingData = null) {
     try {
       // Store messages in Supabase
       const messages = [
@@ -87,6 +87,7 @@ class ConversationService {
           session_id: sessionId,
           role: 'assistant',
           content: answer,
+          highlighting_data: highlightingData ? JSON.stringify(highlightingData) : null,
           created_at: new Date().toISOString()
         }
       ];
@@ -149,7 +150,12 @@ class ConversationService {
         if (msg.role === 'user') {
           return new HumanMessage(msg.content);
         } else {
-          return new AIMessage(msg.content);
+          const aiMessage = new AIMessage(msg.content);
+          // Add highlighting data if available
+          if (msg.highlighting_data) {
+            aiMessage.highlightingData = JSON.parse(msg.highlighting_data);
+          }
+          return aiMessage;
         }
       });
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 
-import { Send, User, Bot, ChevronUp, ChevronDown } from 'lucide-react';
+import { Send, User, Bot, ChevronUp, ChevronDown, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
@@ -26,7 +26,7 @@ const api = {
   }
 };
 
-const ChatInterface = ({ sessionId }) => {
+const ChatInterface = ({ sessionId, onNavigateToTranscript }) => {
   // State management
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -40,9 +40,7 @@ const ChatInterface = ({ sessionId }) => {
   const suggestedQuestions = [
     "What medications were prescribed?",
     "What are the main symptoms?",
-    "Is there a follow-up plan?",
-    "What tests were ordered?",
-    "How is the patient feeling now?"
+    "Is there a follow-up plan?"
   ];
   
   // Refs
@@ -169,6 +167,8 @@ const ChatInterface = ({ sessionId }) => {
 
     try {
       const response = await api.sendMessage(sessionId, userMessage.content);
+      
+      // Update messages with the response
       setMessages(prev => [...prev, response.message]);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to send message');
@@ -206,6 +206,8 @@ const ChatInterface = ({ sessionId }) => {
 
     try {
       const response = await api.sendMessage(sessionId, question);
+      
+      // Update messages with the response
       setMessages(prev => [...prev, response.message]);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to send message');
@@ -279,7 +281,24 @@ const ChatInterface = ({ sessionId }) => {
               </div>
               <div className="message-content">
                 {message.type === 'assistant' ? (
-                  <ReactMarkdown>{message.content}</ReactMarkdown>
+                  <div className="assistant-message-wrapper">
+                    <ReactMarkdown>{message.content}</ReactMarkdown>
+                    {message.highlightingData && message.highlightingData.length > 0 && (
+                      <div className="message-highlight-bubble">
+                        <button 
+                          className="highlight-arrow-button"
+                          onClick={() => {
+                            if (onNavigateToTranscript) {
+                              onNavigateToTranscript(message.highlightingData[0]);
+                            }
+                          }}
+                          title="Show in Transcript"
+                        >
+                          <div className="highlight-arrow"></div>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   message.content
                 )}
@@ -383,6 +402,7 @@ const ChatInterface = ({ sessionId }) => {
           </button>
         </form>
       </div>
+
     </div>
   );
 };
