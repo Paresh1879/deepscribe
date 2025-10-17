@@ -100,6 +100,14 @@ Edit the files in `data/` directory:
 - **Database**: Supabase (PostgreSQL)
 - **AI**: RAG + HyDE for enhanced retrieval
 
+## Future Improvements
+
+• **Multi-Color Transcript Highlighting**: Different colors for medications, symptoms, tests, and diagnoses.
+• **Dynamic File Upload**: Support for PDF, DOCX, audio files with real-time transcription and OCR processing
+• **Enhanced AI with Medical Knowledge Base**: Integration with clinical guidelines, evidence-based responses with citations, and clinical decision support
+• **Multi-Modal AI Processing**: Process text, images, and audio together for comprehensive medical analysis. Analyze medical images, interpret lab results, and extract insights from patient photos or diagnostic scans
+• **Reinforcement Learning**: Self-improving AI that learns from user feedback, corrects diagnostic errors, and optimizes treatment recommendations through continuous learning from clinical outcomes
+
 ---
 
 For DeepScribe's clinical documentation challenge.
